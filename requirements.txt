@@ -1,5 +1,5 @@
-mkdocs
-mkdocs-material
-mkdocs-dracula-theme
-pymdown-extensions
-pygments
+mkdocs>=1.5.0
+mkdocs-material>=9.5.0
+mkdocs-dracula-theme>=1.0.3
+pymdown-extensions>=10.7
+pygments>=2.17.0
