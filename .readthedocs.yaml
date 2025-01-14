@@ -11,6 +11,7 @@ build:
     python: "3.11"
 
 # Build documentation with Mkdocs
+
 mkdocs:
    configuration: mkdocs.yml
 python:
@@ -25,3 +26,7 @@ python:
 #    install:
 #    - requirements: docs/requirements.txt
         
+build:
+  commands:
+    - pip list
+    - mkdocs build
