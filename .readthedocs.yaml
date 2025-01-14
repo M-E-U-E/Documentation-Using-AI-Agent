@@ -16,7 +16,6 @@ mkdocs:
 python:
   install:
     - method: pip
-      path: .
     - requirements: requirements.txt
 # Optionally, but recommended,
 # declare the Python requirements required to build your documentation
