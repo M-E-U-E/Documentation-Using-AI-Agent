@@ -1,1 +1,15 @@
-site_name: My Docs
+site_name: "Documentation Using AI Agent"
+site_description: "User-friendly documentation powered by MkDocs."
+site_url: "https://documentation-using-ai-agent.readthedocs.io"
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: blue
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+repo_url: "https://github.com/M-E-U-E/Documentation-Using-AI-Agent"
+
