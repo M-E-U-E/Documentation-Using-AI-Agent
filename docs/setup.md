@@ -36,7 +36,7 @@ docker exec -it cron_Django python manage.py createsuperuser
 
 ---
 
-## Setting up PostgreSQL
+<!-- ## Setting up PostgreSQL
 
 1. Go to [http://localhost:5050/](http://localhost:5050/).
 
@@ -60,4 +60,4 @@ docker exec -it cron_Django python manage.py createsuperuser
 7. Navigate to:
    - `Servers > testCRON > Databases > cron_db > Schemas > public > Tables`
 
-8. To view a table, click on **View/Edit Data > All Rows**.
+8. To view a table, click on **View/Edit Data > All Rows**. -->

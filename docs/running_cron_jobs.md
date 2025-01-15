@@ -11,10 +11,10 @@ To run cron jobs, follow these steps:
 
 2. **Change the CSV File Paths**
 
-    Update the file paths in your script (default paths are):
+    Update the file paths in your script :
     ```
-    file_path = "C:/Users/User/Downloads/KayakTransactionReport.csv"
-    output_file = "C:/Users/User/Downloads/ProcessedReport.csv"
+    file_path = "...csv"
+    output_file = "...csv"
     ```
 
 3. **Run Cron Jobs**

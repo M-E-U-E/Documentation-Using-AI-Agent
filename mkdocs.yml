@@ -1,4 +1,4 @@
-site_name: "Documentation Using AI Agent"
+site_name: CSV Data Management System
 site_description: "User-friendly documentation powered by MkDocs."
 site_url: "https://documentation-using-ai-agent.readthedocs.io"
 
@@ -13,3 +13,16 @@ theme:
   language: en
 
 repo_url: "https://github.com/M-E-U-E/Documentation-Using-AI-Agent"
+
+nav:
+  - Table of Contents: toc.md
+  - Home: index.md
+  - Introduction: Introduction.md
+  - Prerequisites: prerequisites.md
+  - Setup:
+      - Setting up PostgreSQL: postgresql.md
+      - Project Setup: setup.md
+  - Project Structure: project-structure.md
+  - Running Cron Jobs: running_cron_jobs.md
+  - Technologies Used: technologies.md
+  - Dependencies: dependencies.md
