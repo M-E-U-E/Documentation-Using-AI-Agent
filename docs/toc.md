@@ -6,11 +6,14 @@
 
 ## Prerequisites and Setup
 - [Prerequisites](prerequisites.md)
-- [Setting up PostgreSQL](postgresql.md)
 - [Project Setup](setup.md)
+- [Setting up PostgreSQL](postgresql.md)
 
 ## Development and Structure
-- [Project Structure](project-structure.md)
+- [Project Directory Structure](project_structure.md)
+- [Database Structure](project_database.md)
+
+## Running Cron Jobs
 - [Running Cron Jobs](running_cron_jobs.md)
 
 ## Technologies and Dependencies

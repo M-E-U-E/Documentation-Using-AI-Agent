@@ -1,50 +1,40 @@
-# Project Overview 
+# Project Overview
 
-## CSV Data Management System with Django Admin Integration
-A `Django-based` data management system that automates `CSV data processing`, provides a `customized admin interface`, and maintains data synchronization through `scheduled exports`.
+## KayakTransaction CSV Management System with Django Admin Integration
+A `Django-based` data management system specifically designed to handle **KayakTransaction** CSV files. The system imports and processes these files, stores the data in a `PostgreSQL database`, and provides a `customized Django admin interface` for data visualization and management.
 
 ---
 
 ## Detailed Description
 
 ### Core Functionality
-The system serves as a bridge between `CSV data sources` and a `PostgreSQL database`, featuring a `custom Django admin panel` for data visualization and management. It implements `automated data handling` through periodic exports, ensuring `data consistency and backup`.
+The system serves as a bridge between **KayakTransaction** CSV files and a `PostgreSQL database`, featuring a `custom Django admin panel` for visualizing and managing imported data.
 
 ---
 
 ### Key Components
 
 #### Data Import System
-The import system manages CSV data ingestion through:
+The import system manages **KayakTransaction** CSV data ingestion through:
 
-- Dedicated interface for CSV file uploads with comprehensive error handling.
-- Intelligent parsing and validation of incoming CSV data.
-- Flexible column mapping between CSV and database fields.
-- Detailed validation reporting and error notifications.
+- A dedicated interface for uploading **KayakTransaction** CSV files.
+- Comprehensive error handling during uploads.
+- Intelligent parsing and validation specific to **KayakTransaction** data.
+- Detailed validation reports to notify users of any issues with the data.
 
 #### Custom Admin Interface
-The enhanced Django admin panel features:
+The Django admin panel is customized for **KayakTransaction** data, offering:
 
-- Tailored data views with intuitive navigation.
+- Tailored views for displaying and navigating transaction data.
 - Advanced filtering and search capabilities.
-- Customizable data presentation with dynamic sorting.
-- Granular role-based access control system.
+- Dynamic sorting for better data analysis and management.
 
 #### Database Integration
-PostgreSQL integration includes:
+PostgreSQL is configured to handle **KayakTransaction** data efficiently:
 
-- Robust database schema optimized for CSV data structures.
-- Efficient query optimization and data retrieval patterns.
-- Strong data integrity constraints and validation rules.
-- Automated backup and recovery procedures.
-
-#### Automated Export System
-The Cron-based export system provides:
-
-- Automated tasks running at 60-minute intervals.
-- Systematic CSV file generation from the current database state.
-- Organized file naming conventions for easy tracking.
-- Comprehensive export history management.
+- Robust database schema designed for **KayakTransaction** CSV structures.
+- Efficient query optimization for quick access to transaction data.
+- Strong data integrity rules to ensure data consistency.
 
 ---
 
@@ -53,34 +43,30 @@ The Cron-based export system provides:
 ### Backend
 The backend infrastructure consists of:
 
-- Django framework handling core application logic.
-- Django ORM managing database operations.
-- django-cron job facilitating scheduled tasks.
-- Custom management commands for CSV processing.
+- `Django framework` for handling core application logic.
+- `Django ORM` for managing database operations.
+- Custom management commands for processing **KayakTransaction** CSV files.
 
 ### Database
-PostgreSQL implementation includes:
+PostgreSQL handles all data operations, including:
 
-- Primary data storage with optimized performance.
-- Strategic indexing for frequently accessed data.
-- Reliable backup and recovery mechanisms.
-- Data integrity maintenance protocols.
+- Primary data storage optimized for **KayakTransaction** data.
+- Strategic indexing for frequently queried fields.
+- Strong data integrity and validation mechanisms.
 
 ### File Management
-File handling system features:
+The system ensures proper handling of uploaded files:
 
-- Organized storage hierarchy for imports and exports.
-- Automatic cleanup routines for outdated files.
-- Version control system for change tracking.
-- Efficient storage space management.
+- Organized storage for uploaded **KayakTransaction** CSV files.
+- Automatic cleanup of outdated or invalid files to save space.
 
 ---
 
 ## Benefits
-The system delivers significant advantages:
+The system offers significant advantages for managing **KayakTransaction** data:
 
-- Complete automation of data synchronization processes.
-- Minimized manual data entry requirements.
-- Improved data accessibility through an intuitive admin interface.
-- Consistent data backups via scheduled exports.
-- Future-proof architecture supporting system growth.
+- Streamlined CSV import and validation process.
+- User-friendly interface for viewing and analyzing transaction data.
+- Improved data accuracy through robust validation mechanisms.
+- Reliable PostgreSQL storage for secure and consistent data management.
+- Scalable architecture for future enhancements and data growth.

@@ -1,14 +1,11 @@
 # Introduction
 
-`Django-CRON` is a data management project that automates the handling of CSV files through a customized Django admin panel. The system processes incoming CSV data, stores it in a `PostgreSQL database`, and utilizes `Docker containerization` with `CRON scheduling` for automated data exports.
+`KayakTransaction` is a Django-based data management project designed to handle CSV files specific to **KayakTransaction**. The system imports these CSV files, validates and stores the data in a `PostgreSQL database`, and displays the information through a user-friendly Django admin panel.
 
-The project addresses common data management challenges by providing:
+The project addresses the specific needs of managing **KayakTransaction** data by providing:
 
-- A streamlined `CSV import process` with data validation.
-- A user-friendly `custom admin interface` for data visualization and management.
-- Automated hourly data exports through `CRON jobs` running in Docker containers.
-- Reliable `PostgreSQL database storage` with proper data versioning.
+- A streamlined `CSV import process` tailored for **KayakTransaction** data.
+- A user-friendly `custom admin interface` for viewing and managing the imported data.
+- Reliable `PostgreSQL database storage` for secure and efficient data management.
 
-This solution is particularly valuable for organizations needing to maintain synchronized datasets with regular updates while minimizing manual intervention. The combination of `Django's robust framework`, `Docker's containerization`, and `CRON's scheduling capabilities` ensures reliable and consistent data handling across the system.
-
-By automating the import-export cycle and providing a clean interface for data management, this project significantly reduces the time and effort required for regular data maintenance while ensuring data accuracy and consistency.
+This solution simplifies the management of **KayakTransaction** data, reducing manual intervention and ensuring data accuracy and consistency. By leveraging `Django's robust framework` and a customized admin interface, the system provides an efficient way to handle and visualize CSV data with minimal effort.
