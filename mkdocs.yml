@@ -11,6 +11,8 @@ theme:
     text: Roboto
     code: Roboto Mono
   language: en
+extra:
+  favicon: assets/img/favicon.ico
 
 repo_url: "https://github.com/M-E-U-E/Documentation-Using-AI-Agent"
 
