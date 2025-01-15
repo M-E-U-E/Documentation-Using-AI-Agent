@@ -4,7 +4,7 @@
 python3 -m venv env
 source env/bin/activate
 ```
-  **Create virtual environment On Windows:**
+**Create virtual environment On Windows:**
 ```
 python -m venv env
 venv\Scripts\activate
@@ -13,9 +13,12 @@ venv\Scripts\activate
 ```
 pip install -r requirements.txt
 ```
+**Serve the Documentation Locally**
+```
+mkdocs serve
+```
 
-
-documentation will be live at:
+**documentation will be live at:**
 ```
 https://documentation-using-ai-agent.readthedocs.io/en/latest/
 ```
