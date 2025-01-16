@@ -1,21 +1,24 @@
 # Table of Contents
 
 ## Documentation Overview
-- [Home](index.md)
-- [Introduction](Introduction.md)
+- [1. Background](background.md)
+- [2. Project’s Goal](project_goal.md)
+- [3. Features](features.md)
+- [4. Overview](index.md)
+- [5. Introduction](Introduction.md)
 
 ## Prerequisites and Setup
-- [Prerequisites](prerequisites.md)
-- [Project Setup](setup.md)
-- [Setting up PostgreSQL](postgresql.md)
+- [6. Prerequisites](prerequisites.md)
+- [7.1. Project Setup](setup.md)
+- [7.2. Setting up PostgreSQL](postgresql.md)
 
 ## Development and Structure
-- [Project Directory Structure](project_structure.md)
-- [Database Structure](project_database.md)
+- [8.1. Project Directory Structure](project_structure.md)
+- [8.2. Database Structure](project_database.md)
 
 ## Running Cron Jobs
-- [Running Cron Jobs](running_cron_jobs.md)
+- [9. Running Cron Jobs](running_cron_jobs.md)
 
 ## Technologies and Dependencies
-- [Technologies Used](technologies.md)
-- [Dependencies](dependencies.md)
+- [10. Technologies Used](technologies.md)
+- [11. Dependencies](dependencies.md)

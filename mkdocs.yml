@@ -18,15 +18,19 @@ repo_url: "https://github.com/M-E-U-E/Documentation-Using-AI-Agent"
 
 nav:
   - Table of Contents: toc.md
-  - Home: index.md
-  - Introduction: Introduction.md
-  - Prerequisites: prerequisites.md
-  - Setup:
-      - Project Setup: setup.md
-      - Setting up PostgreSQL: postgresql.md
-  - Project Structure: 
-      - Directory: project_structure.md
-      - Database: project_database.md
-  - Running Cron Jobs: running_cron_jobs.md
-  - Technologies Used: technologies.md
-  - Dependencies: dependencies.md
+  - 1. Background: background.md
+  - 2. Project’s Goal: project_goal.md
+  - 3. Features: features.md
+  - 4. Overview: index.md
+  - 5. Introduction: Introduction.md
+  - 6. Prerequisites: prerequisites.md
+  - 7. Setup:
+      - 7.1. Project Setup: setup.md
+      - 7.2. Setting up PostgreSQL: postgresql.md
+  - 8. Project Structure: 
+      - 8.1. Directory: project_structure.md
+      - 8.2. Database: project_database.md
+  - 9. Running Cron Jobs: running_cron_jobs.md
+  - 10. Dependencies: dependencies.md
+  - 11. Technologies Used: technologies.md
+  
