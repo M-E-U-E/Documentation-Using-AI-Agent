@@ -27,9 +27,6 @@
         └── migrations/
             ├── __init__.py
             ├── 0001_initial.py
-            ├──0002_transaction_boom_score_delta_bucket_and_more.py
-            ├──0003_kayaktransaction_transactionmetadata_and_more.py
-            └── 0004_delete_transactionmetadata.py
     └── templates/
         └── admin/
             ├── change_list.html

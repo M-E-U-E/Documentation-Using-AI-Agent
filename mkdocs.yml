@@ -1,4 +1,4 @@
-site_name: KayakTransaction Documentation
+site_name: "KayakTransaction CSV Processing"
 site_description: "User-friendly documentation powered by MkDocs."
 site_url: "https://documentation-using-ai-agent.readthedocs.io"
 
@@ -17,11 +17,11 @@ extra:
 repo_url: "https://github.com/M-E-U-E/Documentation-Using-AI-Agent"
 
 nav:
-  - Table of Contents: toc.md
+  - Table of Contents: index.md
   - 1. Background: background.md
   - 2. Project’s Goal: project_goal.md
   - 3. Features: features.md
-  - 4. Overview: index.md
+  - 4. Overview: overview.md
   - 5. Introduction: Introduction.md
   - 6. Prerequisites: prerequisites.md
   - 7. Setup:
