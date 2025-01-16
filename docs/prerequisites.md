@@ -73,17 +73,3 @@
 - Database design principles
 
 ---
-
-## Additional Considerations
-
-### Storage:
-- Sufficient disk space for CSV storage
-- Backup storage capacity
-
-### Network:
-- Stable internet connection for package installation
-- Database connection capabilities
-
-### Memory:
-- Minimum `4GB RAM` (`8GB recommended`)
-- Adequate CPU for data processing
