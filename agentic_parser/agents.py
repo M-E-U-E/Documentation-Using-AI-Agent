@@ -27,7 +27,7 @@ doc_reader = Agent(
     llm=LLM(
         model="ollama/deepseek-r1:1.5b",
         base_url="http://localhost:11434"
-    )
+    ) 
 )
 
 CDS_Tool = CodeDocsSearchTool(docs_url='https://documentation-using-ai-agent.readthedocs.io/en/latest/')
