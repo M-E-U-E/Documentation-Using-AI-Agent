@@ -4,3 +4,5 @@ env
 .venv
 ollama
 models
+.env
+db
