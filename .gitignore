@@ -2,3 +2,5 @@ site/
 __pycache__/
 env
 .venv
+ollama
+models
