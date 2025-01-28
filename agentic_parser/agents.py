@@ -1,15 +1,113 @@
+from bs4 import BeautifulSoup
+from typing import Dict, List, Any
+import requests
+from dataclasses import Field
 from crewai import Agent, Task, Crew
-from crewai_tools import ScrapeWebsiteTool
 from dotenv import load_dotenv
+from urllib.parse import urljoin
+from crewai.tools import BaseTool
 import os
 
 load_dotenv()
 
 gapi_key = os.getenv('GEMINI_API_KEY')
 
+class EnhancedDocumentationTool(BaseTool):
+    name: str = "enhanced_documentation_tool"  # Required by BaseTool
+    description: str = "A tool to crawl and extract content from documentation pages."  # Required by BaseTool
+    base_url: str = Field(metadata={"description": "The base URL for the documentation to crawl."})  # Use metadata for description
+
+    def __init__(self, base_url: str):
+        # Pass required fields to the BaseTool constructor
+        super().__init__(
+            name=self.name,
+            description=self.description,
+        )
+        self.base_url = base_url  # This will now work because base_url is declared as a field
+        self.visited_urls = set()
+        self.content_store = {}
+
+    def crawl(self, url: str) -> Dict:
+        """Recursively crawl documentation pages."""
+        if url in self.visited_urls:
+            return {}
+
+        try:
+            response = requests.get(url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            self.visited_urls.add(url)
+
+            # Extract content
+            content = self._extract_content(soup)
+            # Find documentation links
+            links = self._find_doc_links(soup, url)
+
+            # Store current page content
+            self.content_store[url] = {
+                'title': content['title'],
+                'content': content['content'],
+                'links': links,
+                'metadata': content['metadata']
+            }
+
+            # Recursively crawl linked pages
+            for link in links:
+                if link not in self.visited_urls:
+                    self.crawl(link)
+
+            return self.content_store
+
+        except Exception as e:
+            return {'error': f'Failed to crawl {url}: {str(e)}'}
+
+    def _run(self, input_data: Any) -> Any:
+        """Implements the tool's primary logic."""
+        url = input_data.get("url")
+        if not url:
+            return {"error": "No URL provided"}
+        return self.crawl(url)
+
+    def _extract_content(self, soup: BeautifulSoup) -> Dict:
+        """Extract content from page."""
+        main_content = (
+            soup.find('article') or
+            soup.find('main') or
+            soup.find('div', class_='content') or
+            soup.find('div', class_='document')
+        )
+
+        sections = []
+        if main_content:
+            for header in main_content.find_all(['h1', 'h2', 'h3']):
+                sections.append({
+                    'level': int(header.name[1]),
+                    'text': header.get_text(strip=True)
+                })
+
+        return {
+            'title': soup.title.string if soup.title else '',
+            'content': main_content.get_text('\n', strip=True) if main_content else '',
+            'metadata': {
+                'sections': sections
+            }
+        }
+
+    def _find_doc_links(self, soup: BeautifulSoup, current_url: str) -> List[str]:
+        """Find documentation-related links."""
+        links = []
+        for a in soup.find_all('a', href=True):
+            href = a['href']
+            full_url = urljoin(current_url, href)
+            if (
+                full_url.startswith(self.base_url) and
+                not href.startswith('#') and
+                full_url not in self.visited_urls
+            ):
+                links.append(full_url)
+        return links
+
 # Initialize tools
-documentation_url = 'https://documentation-using-ai-agent.readthedocs.io/en/latest/'
-scrape_tool = ScrapeWebsiteTool(website_url=documentation_url)
+doc_tool = EnhancedDocumentationTool('https://documentation-using-ai-agent.readthedocs.io/en/latest/')
 
 
 
@@ -20,7 +118,7 @@ crawler_agent = Agent(
     backstory="""You are an expert web crawler specialized in technical documentation.
     Your mission is to systematically explore and extract content from documentation
     pages while maintaining the proper structure and hierarchy.""",
-    tools=[scrape_tool],
+    tools=[doc_tool],
     verbose=True,
     memory=True,
     llm="gemini/gemini-1.5-flash-latest"
@@ -66,7 +164,7 @@ crawl_task = Task(
     - Error logs if any pages failed to crawl
     """,
     agent=crawler_agent,
-    tools=[scrape_tool],
+    tools=[doc_tool],
     verbose=True
 )
 
