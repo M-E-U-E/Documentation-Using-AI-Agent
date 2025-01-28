@@ -1,31 +1,40 @@
 from bs4 import BeautifulSoup
-from typing import Dict, List, Any
+from typing import Dict, Type
 import requests
 from dataclasses import Field
 from crewai import Agent, Task, Crew
 from dotenv import load_dotenv
 from urllib.parse import urljoin
 from crewai.tools import BaseTool
+from pydantic import BaseModel, Field
 import os
 
 load_dotenv()
 
 gapi_key = os.getenv('GEMINI_API_KEY')
 
+class EnhancedDocumentationToolInput(BaseModel):
+    """Input schema for EnhancedDocumentationTool."""
+    url: str = Field(..., description="The starting URL to crawl for documentation content.")
+
 class EnhancedDocumentationTool(BaseTool):
-    name: str = "enhanced_documentation_tool"  # Required by BaseTool
-    description: str = "A tool to crawl and extract content from documentation pages."  # Required by BaseTool
-    base_url: str = Field(metadata={"description": "The base URL for the documentation to crawl."})  # Use metadata for description
+    name: str = "enhanced_documentation_tool"
+    description: str = "A tool to crawl and extract content from documentation pages."
+    args_schema: Type[BaseModel] = EnhancedDocumentationToolInput
 
     def __init__(self, base_url: str):
-        # Pass required fields to the BaseTool constructor
-        super().__init__(
-            name=self.name,
-            description=self.description,
-        )
-        self.base_url = base_url  # This will now work because base_url is declared as a field
+        # Explicitly set the name and description for BaseTool constructor
+        super().__init__(name=self.name, description=self.description)
+        self.base_url = base_url
         self.visited_urls = set()
         self.content_store = {}
+
+    def _run(self, input_data: EnhancedDocumentationToolInput) -> Dict:
+        """Implements the tool's primary logic."""
+        url = input_data.url  # Extract URL from the input schema
+        if not url:
+            return {"error": "No URL provided"}
+        return self.crawl(url)
 
     def crawl(self, url: str) -> Dict:
         """Recursively crawl documentation pages."""
@@ -60,13 +69,6 @@ class EnhancedDocumentationTool(BaseTool):
         except Exception as e:
             return {'error': f'Failed to crawl {url}: {str(e)}'}
 
-    def _run(self, input_data: Any) -> Any:
-        """Implements the tool's primary logic."""
-        url = input_data.get("url")
-        if not url:
-            return {"error": "No URL provided"}
-        return self.crawl(url)
-
     def _extract_content(self, soup: BeautifulSoup) -> Dict:
         """Extract content from page."""
         main_content = (
@@ -92,7 +94,7 @@ class EnhancedDocumentationTool(BaseTool):
             }
         }
 
-    def _find_doc_links(self, soup: BeautifulSoup, current_url: str) -> List[str]:
+    def _find_doc_links(self, soup: BeautifulSoup, current_url: str) -> list[str]:
         """Find documentation-related links."""
         links = []
         for a in soup.find_all('a', href=True):
@@ -105,6 +107,7 @@ class EnhancedDocumentationTool(BaseTool):
             ):
                 links.append(full_url)
         return links
+    
 
 # Initialize tools
 doc_tool = EnhancedDocumentationTool('https://documentation-using-ai-agent.readthedocs.io/en/latest/')
