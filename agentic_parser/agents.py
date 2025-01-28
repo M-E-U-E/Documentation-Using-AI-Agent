@@ -1,74 +1,130 @@
-from crewai import Agent, Task, Crew, LLM
-from crewai_tools import CodeDocsSearchTool
+from crewai import Agent, Task, Crew
+from crewai_tools import ScrapeWebsiteTool
 
-doc_reader = Agent(
-    role="Technical Documentation Expert",
-    goal=(
-        "Be the ultimate source of clarity and precision in "
-        "helping users understand technical concepts and documentation. "
-        "Ensure users have a seamless experience navigating and applying "
-        "the documentation to solve their problems effectively."
-    ),
-    backstory=(
-        "You are a seasoned Technical Documentation Expert with years of "
-        "experience in simplifying complex technical concepts and making them "
-        "accessible to a diverse audience. Your passion lies in bridging the gap "
-        "between technical content and user understanding, ensuring every piece "
-        "of documentation is both practical and actionable. "
-        "\n\n"
-        "Your mission is to assist {person} in navigating CrewAI's technical documentation, "
-        "answering their questions with thoroughness and empathy, and ensuring they "
-        "feel confident and empowered to utilize the platform effectively. You are known "
-        "for providing full, complete answers without making assumptions and always "
-        "going the extra mile to ensure clarity."
-    ),
-    allow_delegation=False,
+# Initialize tools
+documentation_url = 'https://documentation-using-ai-agent.readthedocs.io/en/latest/'
+scrape_tool = ScrapeWebsiteTool(website_url=documentation_url)
+
+# Define Agents - remove the llm parameter since it's already an LLM object
+crawler_agent = Agent(
+    role="Documentation Crawler",
+    goal="Thoroughly crawl and extract content from documentation pages",
+    backstory="""You are an expert web crawler specialized in technical documentation.
+    Your mission is to systematically explore and extract content from documentation
+    pages while maintaining the proper structure and hierarchy.""",
+    tools=[scrape_tool],
     verbose=True,
-    llm=LLM(
-        model="ollama/deepseek-r1:1.5b",
-        base_url="http://localhost:11434"
-    )
+    memory=True,
+    llm="gemini/gemini-1.5-flash-latest"
 )
 
-CDS_Tool = CodeDocsSearchTool(docs_url='https://documentation-using-ai-agent.readthedocs.io/en/latest/')
-
-TD_Assistance= Task(
-    description=(
-        "{person} has submitted a technical query related to the documentation:\n"
-        "{inquiry}\n\n"
-        "{person} is seeking clarification. "
-        "Your task is to thoroughly analyze the query, reference the relevant sections "
-        "of the technical documentation, and provide a clear and concise explanation. "
-        "Ensure the response is tailored to the customer's context and technical expertise."
-    ),
-    expected_output=(
-        "A comprehensive and user-friendly explanation addressing the customer's inquiry. "
-        "The response should include:\n"
-        "- Detailed references to specific sections of the documentation.\n"
-        "- Explanations that simplify complex terms or concepts, where necessary.\n"
-        "- Additional context or examples to enhance understanding, if applicable.\n"
-        "The tone must remain professional, friendly, and supportive, ensuring the customer "
-        "feels confident and empowered to proceed."
-    ),
-    tools=[CDS_Tool],
-    agent=doc_reader,
+analyzer_agent = Agent(
+    role="Content Analyzer",
+    goal="Process and organize documentation content for efficient retrieval",
+    backstory="""You are an expert in analyzing technical documentation and creating
+    structured knowledge bases. Your role is to process raw content, create summaries,
+    and organize information in an easily searchable format.""",
+    verbose=True,
+    memory=True,
+    llm="gemini/gemini-1.5-flash-latest"
 )
 
+user_assistant = Agent(
+    role="Documentation Guide",
+    goal="Help users understand and apply documentation effectively",
+    backstory="""You are an expert technical assistant who helps users navigate
+    and understand documentation. You can break down complex problems into
+    step-by-step solutions and provide clear, actionable guidance.""",
+    verbose=True,
+    memory=True,
+    llm="gemini/gemini-1.5-flash-latest"
+)
+
+# Define Tasks with expected_output field
+crawl_task = Task(
+    description="""
+    1. Crawl the documentation starting from the provided URL
+    2. Extract content from each page
+    3. Maintain documentation hierarchy
+    4. Collect all relevant links and content
+    5. Store the extracted information
+    """,
+    expected_output="""
+    A structured dictionary containing:
+    - Extracted content from all documentation pages
+    - Hierarchical structure of the documentation
+    - All relevant links and their relationships
+    - Metadata for each page
+    - Error logs if any pages failed to crawl
+    """,
+    agent=crawler_agent,
+    tools=[scrape_tool],
+    verbose=True
+)
+
+analyze_task = Task(
+    description="""
+    1. Process the crawled documentation content
+    2. Generate summaries for each section
+    3. Create a searchable knowledge base
+    4. Identify key concepts and their relationships
+    5. Prepare content for user queries
+    """,
+    expected_output="""
+    A processed knowledge base containing:
+    - Section summaries
+    - Key concepts and their definitions
+    - Relationship mappings between concepts
+    - Indexed content for quick search
+    - Metadata for content organization
+    """,
+    agent=analyzer_agent,
+    verbose=True
+)
+
+assist_task = Task(
+    description="""
+    1. Understand user {query} about the documentation and the {user_context}
+    2. Search the processed knowledge base
+    3. Provide step-by-step solutions
+    4. Explain concepts clearly
+    5. Guide users through implementation
+    """,
+    expected_output="""
+    Clear and actionable responses including:
+    - Direct answers to user {query}
+    - Step-by-step implementation of the answer
+    - Relevant documentation references
+    - Troubleshooting suggestions if needed
+    """,
+    agent=user_assistant,
+    verbose=True
+)
+
+# Updated embedder configuration with correct model name format
+embedder_config = {
+    "provider": "google",
+    "config": {
+        "api_key": "AIzaSyDyB8O5GwprZw3nDUsUQsak9uRwCUGeTII",
+        "model": "models/embedding-001"
+    }
+}
+
+# Create and configure the crew
 crew = Crew(
-  agents=[doc_reader],
-  tasks=[TD_Assistance],
-  verbose=True,
-  memory=True
+    agents=[crawler_agent, analyzer_agent, user_assistant],
+    tasks=[crawl_task, analyze_task, assist_task],
+    verbose=True,
+    memory=True,
+    embedder=embedder_config
 )
-
-
 
 if __name__ == "__main__":
     inputs = {
-    "person": "Andrew Ng",
-    "inquiry": "I need help with setting up the django project"
-               "and kicking it off, specifically "
-               "how can I run the CRON script?"
-               "Can you provide guidance?"
+        "query": "How do I setup and run the project?",
+        "user_context": "experience_level : intermediate, specific_focus : implementation details"
+                  
     }
+    
     result = crew.kickoff(inputs=inputs)
+    print(result)
