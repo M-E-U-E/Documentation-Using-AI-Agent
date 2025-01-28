@@ -1,9 +1,17 @@
 from crewai import Agent, Task, Crew
 from crewai_tools import ScrapeWebsiteTool
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+gapi_key = os.getenv('GEMINI_API_KEY')
 
 # Initialize tools
 documentation_url = 'https://documentation-using-ai-agent.readthedocs.io/en/latest/'
 scrape_tool = ScrapeWebsiteTool(website_url=documentation_url)
+
+
 
 # Define Agents - remove the llm parameter since it's already an LLM object
 crawler_agent = Agent(
@@ -105,7 +113,7 @@ assist_task = Task(
 embedder_config = {
     "provider": "google",
     "config": {
-        "api_key": "AIzaSyDyB8O5GwprZw3nDUsUQsak9uRwCUGeTII",
+        "api_key": gapi_key,
         "model": "models/embedding-001"
     }
 }
