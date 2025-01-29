@@ -23,11 +23,18 @@ def fetch_markdown_files(repo_url: str, folder_path=""):
         dict: A dictionary with filenames as keys and their content as values.
     """
     docs_content = {}
-    
+
     # Construct the GitHub API URL to list files in the current folder
     current_repo_url = f"{repo_url}/contents/{folder_path}" if folder_path else f"{repo_url}/contents"
+    print(f"Fetching contents from: {current_repo_url}")
     
     response = requests.get(current_repo_url)
+    
+    # Handle rate limiting if reached
+    if response.status_code == 403:  # Rate limit error
+        reset_time = response.headers.get('X-RateLimit-Reset')
+        print(f"Rate limit reached, try again after: {reset_time}")
+        return docs_content
     
     # Check for successful response
     if response.status_code != 200:
@@ -44,12 +51,16 @@ def fetch_markdown_files(repo_url: str, folder_path=""):
         # If it's a markdown file, download it
         elif file_info['name'].endswith(".md"):
             file_name = file_info['name']
+            print(f"Downloading markdown file: {file_name}")
             file_url = file_info['download_url']
             
             try:
                 file_response = requests.get(file_url)
                 if file_response.status_code == 200:
                     docs_content[file_name] = file_response.text
+                    # Save to file locally
+                    with open(f"{file_name}", "w", encoding="utf-8") as f:
+                        f.write(file_response.text)
                 else:
                     docs_content[file_name] = f"Error downloading file: {file_response.status_code}"
             except Exception as e:
@@ -63,4 +74,4 @@ documentation_content = fetch_markdown_files(GITHUB_REPO_BASE)
 # Display extracted documentation content for verification
 print("\nExtracted Documentation Content:")
 for file, content in documentation_content.items():
-    print(f"\nFile: {file}\n{'-'*40}\n{content[:1000]}...\n")  # Print first 1000 chars of each file
+    print(f"\nFile: {file}\n{'-'*40}\n{content}\n")  # Print all chars of each file
