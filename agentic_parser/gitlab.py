@@ -1,79 +1,122 @@
 import os
+from dotenv import load_dotenv
 import requests
 import json
+import time
+from urllib.parse import quote
 
-# GitLab Project ID (replace with your project ID)
-GITLAB_PROJECT_ID = 66617663  # Your GitLab project ID
+# Load environment variables
+load_dotenv()
 
-# GitLab repository API URL (using the Project ID)
-GITLAB_REPO_URL = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/repository/tree"
-
-# Custom Tool to Fetch Markdown Files from GitLab Repository
-def fetch_markdown_files_from_gitlab(repo_url: str, folder_path=""):
-    """
-    Fetches markdown files from a GitLab repository and returns structured content.
-    
-    Args:
-        repo_url (str): GitLab API URL to fetch the list of files.
-        folder_path (str): Current directory path to fetch the files from (used for recursion).
+class GitLabDownloader:
+    def __init__(self):
+        # Get configuration from environment variables
+        self.token = os.getenv('GITLAB_TOKEN')
+        self.project_id = os.getenv('GITLAB_PROJECT_ID')
+        self.branch = os.getenv('GITLAB_BRANCH', 'main')
         
-    Returns:
-        dict: A dictionary with filenames as keys and their content as values.
-    """
-    docs_content = {}
-
-    # Construct the GitLab API URL to list files in the current folder
-    current_repo_url = f"{repo_url}?path={folder_path}" if folder_path else f"{repo_url}"
-    print(f"Fetching contents from: {current_repo_url}")
+        if not all([self.token, self.project_id]):
+            raise ValueError("Missing required environment variables. Please check your .env file")
+            
+        self.headers = {'PRIVATE-TOKEN': self.token}
+        self.base_url = f"https://gitlab.com/api/v4/projects/{self.project_id}"
     
-    response = requests.get(current_repo_url)
-    
-    # Handle rate limiting if reached
-    if response.status_code == 403:  # Rate limit error
-        reset_time = response.headers.get('X-RateLimit-Reset')
-        print(f"Rate limit reached, try again after: {reset_time}")
+    def fetch_markdown_files(self, folder_path=""):
+        """
+        Fetches markdown files from a GitLab repository recursively.
+        """
+        docs_content = {}
+        
+        # URL encode the folder path for API request
+        encoded_path = quote(folder_path, safe='')
+        tree_url = f"{self.base_url}/repository/tree?path={encoded_path}&ref={self.branch}"
+        
+        try:
+            response = requests.get(tree_url, headers=self.headers)
+            response.raise_for_status()  # Raise exception for non-200 status codes
+            
+            files = response.json()
+            
+            for file_info in files:
+                file_path = os.path.join(folder_path, file_info['name']) if folder_path else file_info['name']
+                
+                if file_info['type'] == 'tree':
+                    # Recursively process subdirectories
+                    docs_content.update(self.fetch_markdown_files(file_path))
+                    
+                elif file_info['name'].lower().endswith('.md'):
+                    # Fetch markdown file content
+                    content = self.fetch_file_content(file_path)
+                    if content:
+                        docs_content[file_path] = content
+        
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching repository contents: {str(e)}")
+            if hasattr(e.response, 'headers'):
+                # Handle rate limiting
+                if e.response.status_code == 429:  # Rate limit exceeded
+                    reset_time = int(e.response.headers.get('RateLimit-Reset', 0))
+                    wait_time = max(reset_time - int(time.time()), 0)
+                    if wait_time > 0:
+                        print(f"Rate limit reached. Waiting {wait_time} seconds...")
+                        time.sleep(wait_time)
+                        return self.fetch_markdown_files(folder_path)  # Retry after waiting
+        
         return docs_content
     
-    # Check for successful response
-    if response.status_code != 200:
-        raise Exception(f"Failed to fetch files from GitLab: {response.status_code} - {response.text}")
-    
-    files = response.json()
-    
-    for file_info in files:
-        # If it's a directory, recursively call the function to process that folder
-        if file_info['type'] == 'tree':  # If it's a directory in GitLab
-            new_folder_path = os.path.join(folder_path, file_info['name']) if folder_path else file_info['name']
-            docs_content.update(fetch_markdown_files_from_gitlab(repo_url, new_folder_path))
+    def fetch_file_content(self, file_path):
+        """
+        Fetches content of a specific file using GitLab API.
+        """
+        encoded_path = quote(file_path, safe='')
+        file_url = f"{self.base_url}/repository/files/{encoded_path}/raw?ref={self.branch}"
         
-        # If it's a markdown file, download it
-        elif file_info['name'].endswith(".md"):  # If it's a markdown file
-            file_name = file_info['name']
-            print(f"Downloading markdown file: {file_name}")
-            file_raw_url = f"https://gitlab.com/{file_info['path']}/raw"  # GitLab raw file URL
+        try:
+            response = requests.get(file_url, headers=self.headers)
+            response.raise_for_status()
+            return response.text
+        
+        except requests.exceptions.RequestException as e:
+            print(f"Error downloading file {file_path}: {str(e)}")
+            return None
+
+def save_documentation(content, output_file="documentation_content.json"):
+    """
+    Saves the documentation content to a JSON file.
+    """
+    try:
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(content, f, ensure_ascii=False, indent=4)
+        print(f"\nSuccessfully saved data to {output_file}")
+        return True
+    except Exception as e:
+        print(f"Error saving documentation: {str(e)}")
+        return False
+
+def main():
+    try:
+        # Initialize downloader
+        downloader = GitLabDownloader()
+        
+        # Fetch markdown files
+        print("Fetching markdown files from GitLab...")
+        content = downloader.fetch_markdown_files()
+        
+        if content:
+            # Save content
+            if save_documentation(content):
+                # Display preview of downloaded content
+                print("\nPreview of downloaded content:")
+                for file_path, file_content in content.items():
+                    preview = file_content[:200] + "..." if len(file_content) > 200 else file_content
+                    print(f"\nFile: {file_path}\n{'-'*40}\n{preview}\n")
+        else:
+            print("No content was downloaded. Please check your configuration and permissions.")
             
-            try:
-                file_response = requests.get(file_raw_url)
-                if file_response.status_code == 200:
-                    docs_content[file_name] = file_response.text
-                else:
-                    docs_content[file_name] = f"Error downloading file: {file_response.status_code}"
-            except Exception as e:
-                docs_content[file_name] = f"Error reading file: {e}"
-    
-    return docs_content
+    except ValueError as e:
+        print(f"Configuration error: {str(e)}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
 
-# Fetch markdown content from the GitLab repository
-documentation_content = fetch_markdown_files_from_gitlab(GITLAB_REPO_URL)
-
-# Save the documentation content to a JSON file
-json_file_path = "documentation_content.json"
-with open(json_file_path, "w", encoding="utf-8") as json_file:
-    json.dump(documentation_content, json_file, ensure_ascii=False, indent=4)
-
-print(f"\nData has been saved to {json_file_path}")
-
-# Optionally, display extracted content for verification
-print("\nExtracted Documentation Content:")
-for file, content in documentation_content.items():
-    print(f"\nFile: {file}\n{'-'*40}\n{content}\n")  # Print all chars of each file
+if __name__ == "__main__":
+    main()
