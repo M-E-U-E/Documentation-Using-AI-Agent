@@ -1,7 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
-
+import json
 # Load environment variables
 load_dotenv()
 
@@ -58,9 +58,9 @@ def fetch_markdown_files(repo_url: str, folder_path=""):
                 file_response = requests.get(file_url)
                 if file_response.status_code == 200:
                     docs_content[file_name] = file_response.text
-                    # Save to file locally
-                    with open(f"{file_name}", "w", encoding="utf-8") as f:
-                        f.write(file_response.text)
+                    # # Save to file locally
+                    # with open(f"{file_name}", "w", encoding="utf-8") as f:
+                    #     f.write(file_response.text)
                 else:
                     docs_content[file_name] = f"Error downloading file: {file_response.status_code}"
             except Exception as e:
@@ -70,6 +70,11 @@ def fetch_markdown_files(repo_url: str, folder_path=""):
 
 # Fetch markdown content from the GitHub repository
 documentation_content = fetch_markdown_files(GITHUB_REPO_BASE)
+
+# # Save the documentation content to a JSON file
+# json_file_path = "documentation_content.json"
+# with open(json_file_path, "w", encoding="utf-8") as json_file:
+#     json.dump(documentation_content, json_file, ensure_ascii=False, indent=4)
 
 # Display extracted documentation content for verification
 print("\nExtracted Documentation Content:")
