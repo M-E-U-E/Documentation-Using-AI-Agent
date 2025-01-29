@@ -1,9 +1,12 @@
 import requests
 import urllib.parse
+from dotenv import load_dotenv
 from typing import Dict, List, Optional
 import json
 from datetime import datetime
 import os
+
+load_dotenv()
 
 class GitLabRAGProcessor:
     def __init__(self, repo_url: str, output_dir: str = "rag_data"):
@@ -178,7 +181,8 @@ class GitLabRAGProcessor:
             return False
 
 def main():
-    repo_url = "https://gitlab.com/Shino-01/testrepocrawler"  # Replace with actual repository URL
+
+    repo_url = os.getenv("GITLAB_REPO_BASE")  # Replace with actual repository URL
     
     try:
         processor = GitLabRAGProcessor(repo_url)
