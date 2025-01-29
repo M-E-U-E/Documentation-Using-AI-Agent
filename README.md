@@ -14,6 +14,17 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+## Using github 
+Environment:
+```
+GEMINI_API_KEY=api_key
+GITHUB_REPO_BASE = "https://api.github.com/repos/username/repository_name"  
+```
+then run:
+```
+python final_github_md_file.py
+```
+
 # CrewAI
 
 **To Run CrewAI**
