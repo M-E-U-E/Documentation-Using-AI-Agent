@@ -1,48 +1,85 @@
 from crewai_tools import CodeDocsSearchTool
 from crewai import Agent, Task, Crew
 from dotenv import load_dotenv
-
+import requests
+from bs4 import BeautifulSoup
 import os
+from urllib.parse import urljoin, urlparse
 
 load_dotenv()
 
 gapi_key = os.getenv('GEMINI_API_KEY')
-# Initialize tools
-
 documentation_url = 'https://documentation-using-ai-agent.readthedocs.io/en/latest/'
 
-scrape_tool = CodeDocsSearchTool(
-    config=dict(
-        llm=dict(
-            provider="google", # or google, openai, anthropic, llama2, ...
-            config=dict(
-                model="gemini/gemini-1.5-flash-latest",
-                # temperature=0.5,
-                # top_p=1,
-                # stream=true,
-            ),
-        ),
-        embedder=dict(
-            provider="google", # or openai, ollama, ...
-            config=dict(
-                model="models/embedding-001",
-                task_type="retrieval_document",
-                # title="Embeddings",
-            ),
-        ),
-    ),
-    docs_url= documentation_url
-)
+def find_all_subpages(base_url, visited=None):
+    """Find all subpages of a documentation website."""
+    if visited is None:
+        visited = set()
+
+    if base_url in visited:
+        return visited
+
+    print(f"Finding links on: {base_url}")
+    visited.add(base_url)
+
+    try:
+        response = requests.get(base_url, timeout=10)
+        if response.status_code != 200:
+            return visited
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # Find all internal links
+        for link in soup.find_all("a", href=True):
+            href = link["href"]
+            next_url = urljoin(base_url, href)
+
+            # Ensure it's within the same documentation domain
+            if urlparse(next_url).netloc == urlparse(base_url).netloc:
+                if next_url not in visited:
+                    visited.update(find_all_subpages(next_url, visited))
+
+    except Exception as e:
+        print(f"Error finding links on {base_url}: {e}")
+
+    return visited
 
 
-# Define Agents - remove the llm parameter since it's already an LLM object
+# Step 1: Find all subpages
+all_documentation_pages = find_all_subpages(documentation_url)
+print(f"Discovered {len(all_documentation_pages)} pages.")
+
+# Step 2: Initialize CodeDocsSearchTool for each page
+scrape_tools = [
+    CodeDocsSearchTool(
+        config=dict(
+            llm=dict(
+                provider="google",
+                config=dict(
+                    model="gemini/gemini-1.5-flash-latest",
+                ),
+            ),
+            embedder=dict(
+                provider="google",
+                config=dict(
+                    model="models/embedding-001",
+                    task_type="retrieval_document",
+                ),
+            ),
+        ),
+        docs_url=page_url
+    )
+    for page_url in all_documentation_pages
+]
+
+# Define Agents
 crawler_agent = Agent(
     role="Documentation Crawler",
     goal="Thoroughly crawl and extract content from documentation pages",
     backstory="""You are an expert web crawler specialized in technical documentation.
     Your mission is to systematically explore and extract content from documentation
     pages while maintaining the proper structure and hierarchy.""",
-    tools=[scrape_tool],
+    tools=scrape_tools,
     verbose=True,
     memory=True,
     llm="gemini/gemini-1.5-flash-latest"
@@ -70,14 +107,13 @@ user_assistant = Agent(
     llm="gemini/gemini-1.5-flash-latest"
 )
 
-# Define Tasks with expected_output field
+# Define Tasks
 crawl_task = Task(
     description="""
     1. Crawl the documentation starting from the provided URL
-    2. Extract content from each page
-    3. Maintain documentation hierarchy
-    4. Collect all relevant links and content
-    5. Store the extracted information
+    2. Find all subpages and collect their URLs
+    3. Run CodeDocsSearchTool on each subpage
+    4. Store the extracted information
     """,
     expected_output="""
     A structured dictionary containing:
@@ -88,7 +124,7 @@ crawl_task = Task(
     - Error logs if any pages failed to crawl
     """,
     agent=crawler_agent,
-    tools=[scrape_tool],
+    tools=scrape_tools,
     verbose=True
 )
 
@@ -132,7 +168,7 @@ assist_task = Task(
     verbose=True
 )
 
-# Updated embedder configuration with correct model name format
+# Updated embedder configuration
 embedder_config = {
     "provider": "google",
     "config": {
@@ -152,7 +188,7 @@ crew = Crew(
 
 if __name__ == "__main__":
     inputs = {
-        "query": "How do I implement the documentation crawler?",
+        "query": "How do I setup the project?",
         "user_context": {
             "experience_level": "intermediate",
             "specific_focus": "implementation details"
