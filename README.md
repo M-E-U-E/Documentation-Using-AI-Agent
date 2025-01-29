@@ -14,16 +14,34 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Using github 
-Environment:
-```
-GEMINI_API_KEY=api_key
-GITHUB_REPO_BASE = "https://api.github.com/repos/username/repository_name"  
-```
-then run:
-```
-python final_github_md_file.py
-```
+## Using github + gitlab:
+to run github using username and repository name:
+
+    Environment file:
+    ```
+    GEMINI_API_KEY=api_key
+    GITHUB_REPO_BASE = "https://api.github.com/repos/username/repository_name"  
+    ```
+    then run:
+    ```
+    python final_github_md_file.py
+    ```
+
+to run gitlab using token:
+
+    Environment file:
+    ```
+    GITLAB_TOKEN=access_token
+    GITLAB_PROJECT_ID=id
+    GITLAB_BRANCH=main
+    ```
+    then run:
+    
+    ```
+    python gitlab.py
+    ```
+    this is only for fetch data
+
 
 # CrewAI
 
