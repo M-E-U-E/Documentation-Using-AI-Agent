@@ -41,7 +41,12 @@ to run gitlab using token:
     python gitlab.py
     ```
     this is only for fetch data
+    
+to run gitlab without token:
 
+    python GitLabScrapper.py
+    ```
+    this is only for fetch data
 
 # CrewAI
 
