@@ -6,3 +6,4 @@ ollama
 models
 .env
 db
+rag_data
