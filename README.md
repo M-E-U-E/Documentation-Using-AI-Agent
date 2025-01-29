@@ -13,6 +13,23 @@ venv\Scripts\activate
 ```
 pip install -r requirements.txt
 ```
+
+# CrewAI
+
+**To Run CrewAI**
+
+```
+cd agentic_parser
+then run any python file
+```
+
+```
+to read the md file from local
+create new docs folder in this directory and add the md files then run localmd.py
+```
+
+# Run Mkdocs
+
 **Serve the Documentation Locally**
 ```
 mkdocs serve
